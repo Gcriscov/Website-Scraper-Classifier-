@@ -80,87 +80,87 @@ def checkLink(link, root):
 	if m in link:
 		return True
 	return False
-	
-def findTagsOnPage(tag, page):
-	nr_apparitions = page.count(' ' + tag)
-	with open('out.txt', 'a') as fileID:
-		fileID.write(tag.join(' ').join(nr_apparitions))
-	return
 
-url_content = readFile(urls_file)
-tag_content = readFile(tags_file)
-nr_layers = int(tag_content[0])
+url_content = readFile(urls_file) # file with company links
+url_content.pop(0)
+tag_content = readFile(tags_file) # file with tags
+tag_content.pop(0) # delete first row from tag file - comment
+tag_content.pop(0) # delete second row from tag file - comment
+nr_layers = int(tag_content[0]) # number of layers to search in
+tag_content.pop(0) # delete third row from tag list (number of layers)
 tag_content.pop(0)
-tag_content = list({t.lower().strip('\n') for t in tag_content})
-
+tag_content = list({t.lower().strip('\n') for t in tag_content}) # list with tags
+print(tag_content)
 for line in url_content:
-	open_page = ''.join(line);
-	
-	company = re.split('[.]', open_page)[1]
-	if company is None:
+	open_page = ''.join(line); # take every link from file with company links
+	if ('\n' in open_page):
+		print('---------------' + open_page)
+		open_page = open_page.replace('\n', '')
+	company = re.split('[.]', open_page)[1] # take company name from link 
+	if company is None: 
 		print('Invalid company name.')
 	else:
 		print('Company: ' + company)
 		company = company
-		if os.path.exists('out_' + company + '.csv'):
-			os.remove('out_' + company+ '.csv')
-		else:
-			print("The file does not exist")
-		with open('out_' + company+ '.csv', 'a') as fileID:
+		if os.path.exists('out_' + company + '.csv'): # check if file out_company-name.csv exists
+			os.remove('out_' + company+ '.csv') # delete any old file
+		with open('out_' + company+ '.csv', 'a') as fileID: # create new file
 			s = ''
-			for t in tag_content:
+			for t in tag_content: # set column titles as tag names
 				s = s + ',' + t 
-			fileID.write(company + s + '\n')
+			fileID.write(company + s + '\n') # write header to file
 			
-		if(nr_layers == 1):
+		if(nr_layers == 1): # check number of layers to search into
 			all_links = get_links(open_page)
 		elif(nr_layers == 2):
 			all_links = get_links_2layers(open_page)
 		else:
 			all_links = ''
 			print('*****************     '.join('Empty ').join(urls_file).join(' file.'))
-		print('***********************' )
-		if(all_links != False):
-			for link in sorted(all_links):
-				if(link != False or link.count('.pdf') == 0):
-					str_to_file = link
-					print(company)
+		if(all_links != False): # check if we there are links in all_links
+			for link in sorted(all_links): 
+				if ('\n' in link):
+					print('---------------' + link)
+					link = link.replace('\n', '')
+				if(link != False and link.count('.pdf') == 0 and (company in link)):
+					str_to_file = link # create row to insert in file
+					
 					try:
 						print("Webpage Link: " + link)
-						page = BeautifulSoup(get_dom(link).content, 'lxml')
-						
+						cont = get_dom(link).content
+						if (cont == False):
+							break
+						page = BeautifulSoup(cont, 'lxml')
 						for script in page('script'):
 							script.decompose() # delete all script modules
 						for script in page('style'):
 							script.decompose() # delete all style modules
+						sum = 0 # sum - counts all apparitions of tags
 						for i in range(0, len(tag_content)):
 							tag = tag_content[i]
 							nr_apparitions = str(page).lower().count(' ' + tag)
-							print(str(nr_apparitions) + '---' + tag)
+							sum = sum + nr_apparitions
+							if(nr_apparitions != 0):
+								print(str(nr_apparitions) + '----' + str(tag))
 							str_to_file = str_to_file + ',' + str(nr_apparitions)
-						
-						with open('out_' + company + '.csv', 'a') as fileID:
-							fileID.write(str(str_to_file) + '\n')
-							
+						if(sum > 0): # if sum == 0, don't write tags to file
+							with open('out_' + company + '.csv', 'a') as fileID:
+								fileID.write(str(str_to_file) + '\n')
+							print('Wrote to file')
+						else:
+							print('No tag found')
 					except Exception as e: 
 						print(e)
 				else:
 					print('Can not open URL: ' + open_page)
-		else:
-			print('Can not open URL: ' + open_page)
+				print('\n')
+				time.sleep(1) 
 	print('***************************************************************************')
-	
-for csvfile in glob.glob(os.path.join('.', 'out_*.csv')):
-    wb = xlwt.Workbook()
-    fpath = csvfile.split("/", 1)
-    fname = fpath[1].split(".", 1) ## fname[0] should be our worksheet name
 
-    ws = wb.add_sheet(fname[0])
-    with open(csvfile, 'rb') as f:
-        reader = csv.reader(f)
-        for r, row in enumerate(reader):
-            for c, col in enumerate(row):
-                ws.write(r, c, col)
-    wb.save('OEM_tags_out.xls')
-	
-	
+out_files = [filename for filename in os.listdir('.') if filename.startswith("out_")]
+for file in out_files:
+	with open(file, 'r') as fileID:
+		content = fileID.readFile()
+		
+
+
