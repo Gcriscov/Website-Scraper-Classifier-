@@ -2,8 +2,17 @@
 #Comment line
 2
 ASIC
-AI
-Network
-Telecom
-
-
+TSMC
+Global Foundries
+Samsung
+ST Semi
+Tower Jazz
+semiconductor
+Amkor
+2.5D
+flipchip
+wirebond
+eSilicon
+open silicon
+verysilicon
+guc
