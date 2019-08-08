@@ -13,6 +13,15 @@ import os
 import glob
 import csv
 import xlsxwriter
+from itertools import chain
+import torch
+
+start = torch.cuda.Event(enable_timing=True)
+end = torch.cuda.Event(enable_timing=True)
+
+start.record()
+
+
 urls_file = 'TrainingOEMs.txt'
 tags_file = 'tags_file.txt'
 urllib3.disable_warnings()
@@ -38,11 +47,11 @@ def get_links(url):
 		return False
 
 # Return links url ( 2 layers: all links found un url page + all links on those pages)
-def get_links_2layers(url, nr_layers):
+def get_links_2layers(url):
 	list = get_links(url)
 	if list != False:
 		for link in list:
-			list = list + get_links(link)
+			list = chain(list, get_links(link))
 		return list
 	else:
 		return False
@@ -118,7 +127,8 @@ for line in url_content:
 		print('*****************     '.join('Empty ').join(urls_file).join(' file.'))
 		
 	if(all_links != False): # check if we there are links in all_links
-		for link in sorted(all_links): 
+		print(type(all_links))
+		for (link) in all_links: 
 			if ('\n' in link):
 				print('---------------' + link)
 				link = link.replace('\n', '')
@@ -154,7 +164,9 @@ for line in url_content:
 			else:
 				print('Can not open URL: ' + open_page)
 			print('\n')
-			time.sleep(1) 
+			time.sleep(0.005) 
 	print('***************************************************************************')
 workbook.close()
-		
+end.record()
+print()
+print('Total execution time (minutes): ',start.elapsed_time(end)/60000)

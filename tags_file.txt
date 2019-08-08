@@ -1,18 +1,4 @@
-#Comment line
-#Comment line
+#comment
+#comment
 2
 ASIC
-TSMC
-Global Foundries
-Samsung
-ST Semi
-Tower Jazz
-semiconductor
-Amkor
-2.5D
-flipchip
-wirebond
-eSilicon
-open silicon
-verysilicon
-guc
