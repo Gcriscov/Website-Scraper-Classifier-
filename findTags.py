@@ -15,8 +15,6 @@ import csv
 import xlsxwriter
 from itertools import chain
 
-
-
 urls_file = 'TrainingOEMs.txt'
 tags_file = 'tags_file.txt'
 urllib3.disable_warnings()
