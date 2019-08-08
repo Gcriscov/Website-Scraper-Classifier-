@@ -14,12 +14,7 @@ import glob
 import csv
 import xlsxwriter
 from itertools import chain
-import torch
 
-start = torch.cuda.Event(enable_timing=True)
-end = torch.cuda.Event(enable_timing=True)
-
-start.record()
 
 
 urls_file = 'TrainingOEMs.txt'
@@ -167,6 +162,4 @@ for line in url_content:
 			time.sleep(0.005) 
 	print('***************************************************************************')
 workbook.close()
-end.record()
-print()
-print('Total execution time (minutes): ',start.elapsed_time(end)/60000)
+
