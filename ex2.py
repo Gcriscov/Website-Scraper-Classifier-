@@ -107,14 +107,15 @@ for line in url_content:
 	if ('\n' in open_page):
 		open_page = open_page.replace('\n', '')
 		print('page opened')
-		
+	print("open page:" + open_page)
 	try:
 		company = re.split('[.]', open_page)[1] # take company name from link
 	except Exception as e:
 		print(e)
-		
+	print("company:" + company)
 	worksheet = workbook.add_worksheet(company)
 	header = [company] + tag_content
+	print(header)
 	worksheet.write_row('A1', tuple(header)) # write header to file
 	row = 2
 	if(nr_layers == 1): # check number of layers to search into
@@ -129,6 +130,7 @@ for line in url_content:
 
 	if(all_links != False): # check if we there are links in all_links
 		print(type(all_links))
+
 		for (link) in all_links: 
 			if ('\n' in link):
 				print('---------------' + link)
