@@ -14,7 +14,16 @@ import glob
 import csv
 import xlsxwriter
 from itertools import chain
+import re
+#from signal import *
+#import os, time
 
+#def clean(*args):
+#    print('Forced exit!')
+#    os._exit(0)
+
+#for sig in (SIGABRT, SIGINT, SIGTERM):
+#    signal(sig, clean)
 list1 = []
 urls_file = 'TrainingOEMs.txt'
 tags_file = 'tags_file.txt'
@@ -101,33 +110,46 @@ workbook = xlsxwriter.Workbook('OEM_results_file.xlsx')
 
 print('open page')
 
+index = 0
 for line in url_content:
-	open_page = ''.join(line); # take every link from file with company links
 	
-	if ('\n' in open_page):
-		open_page = open_page.replace('\n', '')
-		print('page opened')
-	print("open page:" + open_page)
-	try:
-		company = re.split('[.]', open_page)[1] # take company name from link
-	except Exception as e:
-		print(e)
-	print("company:" + company)
-	worksheet = workbook.add_worksheet(company)
-	header = [company] + tag_content
-	print(header)
-	worksheet.write_row('A1', tuple(header)) # write header to file
+	index += 1
 	row = 2
+	if index == 1:
+		open_page = ''.join(line); # take every link from file with company links
+	
+		if ('\n' in open_page):
+			open_page = open_page.replace('\n', '')
+			#print('page opened')
+		#print("open page:" + open_page)
+		try:
+			company = re.split('[.]', open_page)[1] # take company name from link
+		except Exception as e:
+			print(e)
+		Email = ('@' + company + '.com')
+		tag_content.insert(0, Email)
+		#print("company:" + company)
+		worksheet = workbook.add_worksheet(company)
+		header = [company] + tag_content
+		print(header)
+		worksheet.write_row('A1', tuple(header)) # write header to file
+		
+	
 	if(nr_layers == 1): # check number of layers to search into
 		print('getting links (1)')
 		all_links = get_links(open_page)
 	elif(nr_layers == 2):
 		print('getting links (1)')
 		all_links = get_links_2layers(open_page)
+		#print(all_links)
 	else:
 		all_links = ''
 		print('*****************     '.join('Empty ').join(urls_file).join(' file.'))
-
+	try:
+		print('An error has occur but the exel was saved')
+	except Exception as e:
+		workbook.close()
+		
 	if(all_links != False): # check if we there are links in all_links
 		print(type(all_links))
 
@@ -135,14 +157,18 @@ for line in url_content:
 			if ('\n' in link):
 				print('---------------' + link)
 				link = link.replace('\n', '')
+			
+			com = re.search(open_page, link)
+			if not com:
+				continue
 				
 			if link in list1:
-			#	print("The site was repeting and was skiped")
-			#	print("test" + link )
+				#print("The site was repeting and was skiped")
+				#print("test" + link )
 				continue	
 					
 			list1.append(link)
-				
+
 			if(link != False and link.count('.pdf') == 0 and (company in link)):
 				# print("aici se verifica" + link)
 				
@@ -161,24 +187,26 @@ for line in url_content:
 					sum = 0 # sum - counts all apparitions of tags
 					for i in range(0, len(tag_content)):
 						tag = tag_content[i]
-						nr_apparitions = str(page).lower().count(' ' + tag)
+						nr_apparitions = str(page).lower().count(tag)
 						sum = sum + nr_apparitions
 						if(nr_apparitions != 0):
 							print(str(nr_apparitions) + '----' + str(tag))
 						str_to_file.append(nr_apparitions)
+						
+							
 					if(sum > 0): # if sum == 0, don't write tags to file
 						worksheet.write_row('A' + str(row), tuple(str_to_file)) # write values to file
 						row = row + 1
 						print('Wrote to file')
+						
 					else:
 						print('No tag found')
+					
 				except Exception as e: 
 					print(e)
-			else:
-				print('Can not open URL: ' + open_page)
-			print('\n')
+				#print(page)
+			#print('\n')
 			time.sleep(0.05) 
-			
 	print('***************************************************************************')
 
 workbook.close()
