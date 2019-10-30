@@ -15,6 +15,7 @@ import csv
 import xlsxwriter
 from itertools import chain
 import re
+
 #from signal import *
 #import os, time
 
@@ -103,36 +104,34 @@ tag_content.pop(0)
 tag_content = list({t.lower().strip('\n') for t in tag_content}) # list with tags
 print(tag_content)
 
-print('checking XLS file exists')
-if os.path.exists('OEM_results_file.xlsx'): # check if file out_company-name.csv exists
-	os.remove('OEM_results_file.xlsx')
-workbook = xlsxwriter.Workbook('OEM_results_file.xlsx')
+workbook_name = 'OEM_results_file.xlsx'
+workbook = xlsxwriter.Workbook(workbook_name)
+
+
 
 print('open page')
 
 index = 0
 for line in url_content:
 	
-	index += 1
 	row = 2
-	if index == 1:
-		open_page = ''.join(line); # take every link from file with company links
+	open_page = ''.join(line); # take every link from file with company links
 	
-		if ('\n' in open_page):
-			open_page = open_page.replace('\n', '')
-			#print('page opened')
+	if ('\n' in open_page):
+		open_page = open_page.replace('\n', '')
+		#print('page opened')
 		#print("open page:" + open_page)
-		try:
-			company = re.split('[.]', open_page)[1] # take company name from link
-		except Exception as e:
-			print(e)
-		Email = ('@' + company + '.com')
-		tag_content.insert(0, Email)
-		#print("company:" + company)
-		worksheet = workbook.add_worksheet(company)
-		header = [company] + tag_content
-		print(header)
-		worksheet.write_row('A1', tuple(header)) # write header to file
+	try:
+		company = re.split('[.]', open_page)[1] # take company name from link
+	except Exception as e:
+		print(e)
+	Email = ('@' + company + '.com')
+	tag_content.insert(0, Email)
+	#print("company:" + company)
+	worksheet = workbook.add_worksheet(company)
+	header = [company] + tag_content
+	print(header)
+	worksheet.write_row('A1', tuple(header)) # write header to file
 		
 	
 	if(nr_layers == 1): # check number of layers to search into
@@ -145,14 +144,10 @@ for line in url_content:
 	else:
 		all_links = ''
 		print('*****************     '.join('Empty ').join(urls_file).join(' file.'))
-	try:
-		print('An error has occur but the exel was saved')
-	except Exception as e:
-		workbook.close()
-		
+	
 	if(all_links != False): # check if we there are links in all_links
 		print(type(all_links))
-
+		
 		for (link) in all_links: 
 			if ('\n' in link):
 				print('---------------' + link)
@@ -201,12 +196,13 @@ for line in url_content:
 						
 					else:
 						print('No tag found')
+					#workbook.close()
+					#workbook_obj = openpyxl.load_workbook(workbook_name)
 					
 				except Exception as e: 
 					print(e)
 				#print(page)
 			#print('\n')
-			time.sleep(0.05) 
+			time.sleep(0.05) 	
 	print('***************************************************************************')
-
 workbook.close()
