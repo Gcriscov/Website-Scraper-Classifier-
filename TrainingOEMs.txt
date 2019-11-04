@@ -1,3 +1,2 @@
 #add links without "/" at the end
-http://serviceauto.ro
-http://www.sivantos.com/
+https://tobii.com
