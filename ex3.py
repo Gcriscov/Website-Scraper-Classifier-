@@ -17,6 +17,8 @@ from itertools import chain
 import re
 from re import search
 import torch
+from collections.abc import Iterable
+from _ast import Del
 
 #start = torch.cuda.Event(enable_timing=True)
 #end = torch.cuda.Event(enable_timing=True)
@@ -62,6 +64,9 @@ def get_links_2layers(url):
 	list = get_links(url)
 	if list != False:
 		for link in list:
+			if get_links(url) in list:
+				print("duplicate link")
+				continue	
 			list = chain(list, get_links(link))
 		return list
 	else:
@@ -96,13 +101,8 @@ def readFile(fname):
 def checkLink(link, root):
 	found = ''
 	m = re.search('www(.+?).com', root)
-	
-	
-	if (n in link):
-		return ((False))
-	else:
-		if (m in link):
-			return True
+	if (m in link):
+		return True
 	return ((False))
 
 url_content = readFile(urls_file) # file with company links
@@ -160,15 +160,19 @@ for line in url_content:
 		all_links = ''
 		print('*****************     '.join('Empty ').join(urls_file).join(' file.'))
 	
-	if(all_links != ((False))): # check if we there are links in all_links
-		print(type(all_links))
+	if(all_links != ((False))): # check if there are links in all_links
+		print("last print: ",type(all_links))
 		
 		for link in all_links: 
-			#print('Printare link:' + link)
-			if ('\n' in link):
-				print('---------------' + link)
-				link = link.replace('\n', '')
-			
+			#print('Print link:' + link)
+			#if ('\n' in link):
+				#print('---------------' + link)
+			#	link = link.replace('\n', '')
+				
+			if link in list1:
+				#print("The site was repeating and was skiped")
+				#print("test" + link )
+				continue	
 			com = re.search(open_page, link)
 			java = re.search('javascript:', link)
 			if not com:
@@ -177,11 +181,7 @@ for line in url_content:
 				print('aici a gasit la:' + link)
 				continue
 			
-			if link in list1:
-				#print("The site was repeting and was skiped")
-				#print("test" + link )
-				continue	
-					
+			print("new unique link added: ", link)
 			list1.append(link)
 
 			if(link != ((False)) and link.count('.pdf') == 0 and (company in link)):
@@ -190,7 +190,7 @@ for line in url_content:
 				str_to_file = [link] # create row to insert in file
 				
 				try:
-					print("Webpage Link: " + link)
+					#print("Webpage Link: " + link)
 					cont = get_dom(link).content
 					if (cont == ((False))):
 						break
@@ -220,10 +220,12 @@ for line in url_content:
 					#workbook_obj = openpyxl.load_workbook(workbook_name)
 					
 				except Exception as e: 
-					print(e)
+					print("final exception raised: ",e)
 				#print(page)
 			#print('\n')
 			time.sleep(0.05) 	
+			
+	del tag_content[0]
 	print('***************************************************************************')
 	workbook.close()
 
