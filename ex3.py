@@ -54,7 +54,7 @@ def get_links(url):
 	if url != False:
 		tags = BeautifulSoup(url.content, 'lxml').findAll('a', {"href": True})
 		href_set = {tag.get('href') for tag in tags}
-		#print('this is href_set:' + str(href_set))
+		print('this is href_set:' + str(href_set))
 		return resolve_links((href for href in href_set), u)
 	else:
 		return ((False))
@@ -101,6 +101,12 @@ def readFile(fname):
 def checkLink(link, root):
 	found = ''
 	m = re.search('www(.+?).com', root)
+	j = re.search('javascript:', root)
+	e = re.search ('mailto:', root)
+	if (j in link):
+		return ((False))
+	if (e in link):
+		return ((False))
 	if (m in link):
 		return True
 	return ((False))
@@ -174,12 +180,12 @@ for line in url_content:
 				#print("test" + link )
 				continue	
 			com = re.search(open_page, link)
-			java = re.search('javascript:', link)
+			#java = re.search('javascript:', link)
 			if not com:
 				continue
-			if java:
-				print('aici a gasit la:' + link)
-				continue
+			#if java:
+			#	print('aici a gasit la:' + link)
+			#	continue
 			
 			print("new unique link added: ", link)
 			list1.append(link)
